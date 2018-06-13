@@ -1,14 +1,25 @@
 <h1>My URL Shortener</h1>
-  <table>
-    <tr>
-      <td>
-    <form method="POST" action="/login">
-      <input type="text" name="username" value=""/>
-      <input type="Submit" value="Login"/>
+<table>
+<% if (username) { %>
+  <tr>
+    <td>
+      <form method="POST" action="/logout">
+        <input type="Submit" value="Logout"/>
     </td>
     <td>
-      <h5>Welcome, <%=username%></h5>
+      <h5>Welcome <%= username%></h5>
     </td>
-    </form>
+      </form>
   </tr>
-  </table>
+  <% } else { %>
+    <tr>
+      <td>
+        <form method="POST" action="/login">
+          <input type="text" name="username" value=""/>
+          <input type="Submit" value="Login"/>
+      </td>
+      </form>
+    <% } %>
+  </tr>
+</table>
+

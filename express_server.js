@@ -26,12 +26,17 @@ var urlDatabase = {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-
-// Login
+// Logging in
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
   res.redirect("/urls");
-})
+});
+
+// Logging out
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
 
 // All URLs
 app.get("/urls", (req, res) => {
