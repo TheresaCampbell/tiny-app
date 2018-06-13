@@ -20,6 +20,9 @@
           <td><%= shortURL %></td>
           <td><%= urls[shortURL] %></td>
           <td>
+            <a href="/urls/<%=shortURL%>">Edit</a>
+          </td>
+          <td>
             <form method="POST" action="/urls/<%=shortURL%>/delete">
               <input type="Submit" value="Delete"/>
             </form>
