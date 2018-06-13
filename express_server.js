@@ -40,7 +40,7 @@ app.post("/urls", (req, res) => {
   var errors = [];
   let randomURL = generateRandomString();
   urlDatabase[randomURL] = req.body.longURL
-  res.redirect(`http://localhost:8081/urls/${randomURL}`);
+  res.redirect(`/urls/${randomURL}`)
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -53,10 +53,12 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get("/hello", (req, res) => {
-  res.end("<html><body>Hello <b>World</b></body></html>\n")
+app.post("/urls/:shortURL/delete", (req, res) => {
+  console.log("hello");
+  delete urlDatabase[req.params.shortURL];
+  console.log(req.params.shortURL);
+  res.redirect("/urls");
 })
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

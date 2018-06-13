@@ -15,15 +15,20 @@
         </tr>
       </thead>
       <tbody>
-        <% for(shortUrl in urls) { %>
+        <% for(shortURL in urls) { %>
         <tr>
-          <td><%= shortUrl %></td>
-          <td><%= urls[shortUrl] %></td>
+          <td><%= shortURL %></td>
+          <td><%= urls[shortURL] %></td>
+          <td>
+            <form method="POST" action="/urls/<%=shortURL%>/delete">
+              <input type="Submit" value="Delete"/>
+            </form>
+          </td>
         </tr>
         <% } %>
         <tr>
           <td colSpan="2">
-            <a href="/url/new">New Tiny URL</a>
+            <a href="/urls/new">New Tiny URL</a>
           </td>
         </tr>
       </tbody>
