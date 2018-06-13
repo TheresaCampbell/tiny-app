@@ -27,20 +27,29 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+// Login
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
   res.redirect("/urls");
 })
 
+// All URLs
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render("urls_index", templateVars);
 });
 
+
+// New URL form
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = { username: req.cookies["username"] };
+  res.render("urls_new", templateVars);
 });
 
+// Adding new URL to main URL page
 app.post("/urls", (req, res) => {
   var errors = [];
   let randomURL = generateRandomString();
@@ -48,21 +57,29 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${randomURL}`)
 });
 
+// Redirects to long URL's website
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
 
+// Single URL
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.id] };
+  let templateVars = {
+    shortURL: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies["username"]
+  };
   res.render("urls_show", templateVars);
 });
 
+// Edit form (which immediately redirects back to the main URL page)
 app.post("/urls/:shortURL/edit", (req, res) => {
   urlDatabase[req.params.shortURL] = req.body["longURL"];
   res.redirect("/urls");
 });
 
+// Delete a URL (which immediately redirects back to the main URL page)
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
