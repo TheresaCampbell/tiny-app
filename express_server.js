@@ -1,10 +1,14 @@
+// Add comments to code.
+
 var express = require("express");
 var app = express();
 const bodyParser = require("body-parser");
+var cookieParser = require("cookie-parser");
 var PORT = 8081;
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 function generateRandomString() {
   var string = "";
@@ -23,9 +27,10 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/", (req, res) => {
-  res.end("Hello!\n");
-});
+app.post("/login", (req, res) => {
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
+})
 
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
