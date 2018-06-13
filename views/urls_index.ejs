@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>TinyApp</title>
+  </head>
+  <body>
+    <header>
+    <%- include partials/_header.ejs %>
+    </header>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Short URLs</th>
+          <th>Long URLs</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for(shortUrl in urls) { %>
+        <tr>
+          <td><%= shortUrl %></td>
+          <td><%= urls[shortUrl] %></td>
+        </tr>
+        <% } %>
+        <tr>
+          <td colSpan="2">
+            <a href="/url/new">New Tiny URL</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>

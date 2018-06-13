@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>TinyApp</title>
+  </head>
+  <body>
+    <header>
+    <%- include partials/_header.ejs %>
+  </header>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Short URL</th>
+          <th>Long URL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><%= shortURL %></td>
+          <td><%= longURL %></td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
