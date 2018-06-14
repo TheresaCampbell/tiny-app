@@ -39,15 +39,37 @@ const users = {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-// Logging in
+
+// Creating login page
+app.get("/login", (req, res) => {
+  res.cookie("user_id", req.body["user_id"]);
+  res.render("login");
+})
+
+// Posting to login page
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
-  res.redirect("/urls");
+  for (var user_id in users) {
+    if (users[user_id].email === req.body["user_email"]) {
+      if (users[user_id].password === req.body["password"]) {
+        res.cookie("user_id", users[user_id].id);
+        res.redirect("/urls");
+      } else {
+        res.status(403).render("403");
+      }
+    }
+  }
+  res.status(403).render("403");
 });
+
+// // Logging in USED TO BE IN HEADER BEFORE I MADE LOGIN PAGE
+// app.post("/login", (req, res) => {
+//   res.cookie("user_id", req.body["user_id"]);
+//   res.redirect("/urls");
+// });
 
 // Logging out
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -56,31 +78,41 @@ app.get("/register", (req, res) => {
   let templateVars = {
     userEmail: req.body["email"],
     userPassword: req.body["password"],
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("user_registration", templateVars);
 });
 
 // Adding new user to Users Database
 app.post("/register", (req, res) => {
-  //Checking if input is empty string or email is already in use
-  let randomUserID = generateRandomString();
-  let newUser = {
-    id: randomUserID,
-    email: req.body["email"],
-    password: req.body["password"]
-  };
-  users[randomUserID] = newUser
-  res.cookie("username", randomUserID);
-  console.log(users);
-  res.redirect("/urls");
+  let alreadyExists = false;
+
+  for (var user_id in users) {
+    if (users[user_id].email === req.body["email"]) {
+      alreadyExists = true;
+    }
+  }
+  // If email is already in Users database, or email or password fields are left blank, Error 400. Otherwise, user is added.
+  if (alreadyExists || !req.body["email"] || !req.body["password"]) {
+    res.status(400).render("400");
+  } else {
+    let randomUserID = generateRandomString();
+    let newUser = {
+      id: randomUserID,
+      email: req.body["email"],
+      password: req.body["password"]
+    }
+    users[randomUserID] = newUser
+    res.cookie("user_id", randomUserID);
+    res.redirect("/urls");
+  }
 });
 
 // All URLs
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_index", templateVars);
 });
@@ -88,7 +120,7 @@ app.get("/urls", (req, res) => {
 
 // New URL form
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
+  let templateVars = { user: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
 });
 
@@ -111,7 +143,7 @@ app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
 });
