@@ -1,13 +1,13 @@
 <h1>My URL Shortener</h1>
 <table>
-<% if (username) { %>
+<% if (user) { %>
   <tr>
     <td>
       <form method="POST" action="/logout">
         <input type="Submit" value="Logout"/>
     </td>
     <td>
-      <h5>Welcome <%= username%></h5>
+      <h5>Welcome <%= user.id %></h5>
     </td>
       </form>
   </tr>
@@ -15,7 +15,7 @@
     <tr>
       <td>
         <form method="POST" action="/login">
-          <input type="text" name="username" value=""/>
+          <input type="text" name="user_id" value=""/>
           <input type="Submit" value="Login"/>
       </td>
       </form>
