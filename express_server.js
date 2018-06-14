@@ -16,9 +16,24 @@ function generateRandomString() {
   return string;
 }
 
+// URL Database
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xk": "http://www.google.com"
+};
+
+// Users Database
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "a-b-c"
+  },
+ "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "1-2-3"
+  }
 };
 
 app.get("/urls.json", (req, res) => {
@@ -36,14 +51,29 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-// New Registration Form
+// New user registration form
 app.get("/register", (req, res) => {
   let templateVars = {
-    userEmail: req.body["userEmail"],
-    userPassword: req.body["userPassword"],
+    userEmail: req.body["email"],
+    userPassword: req.body["password"],
     username: req.cookies["username"]
   };
   res.render("user_registration", templateVars);
+});
+
+// Adding new user to Users Database
+app.post("/register", (req, res) => {
+  //Checking if input is empty string or email is already in use
+  let randomUserID = generateRandomString();
+  let newUser = {
+    id: randomUserID,
+    email: req.body["email"],
+    password: req.body["password"]
+  };
+  users[randomUserID] = newUser
+  res.cookie("username", randomUserID);
+  console.log(users);
+  res.redirect("/urls");
 });
 
 // All URLs
