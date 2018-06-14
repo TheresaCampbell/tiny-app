@@ -18,8 +18,16 @@ function generateRandomString() {
 
 // URL Database
 var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xk": "http://www.google.com"
+  "b2xVn2": {
+    shortURL: "b2xVn2",
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "userRandomID"
+  };
+  "9sm5xk": {
+    shortURL: "9sm5xk",
+    longURL: "http://www.google.com",
+    userID: "user2RandomID"
+  };
 };
 
 // Users Database
@@ -52,10 +60,11 @@ app.post("/login", (req, res) => {
     if (users[user_id].email === req.body["user_email"]) {
       if (users[user_id].password === req.body["password"]) {
         res.cookie("user_id", users[user_id].id);
-        res.redirect("/urls");
+        res.redirect("/"); // <--Compass said to set to "/", but hasn't said to make that page yet.
       } else {
         res.status(403).render("403");
       }
+      return
     }
   }
   res.status(403).render("403");
@@ -121,7 +130,12 @@ app.get("/urls", (req, res) => {
 // New URL form
 app.get("/urls/new", (req, res) => {
   let templateVars = { user: users[req.cookies["user_id"]] };
-  res.render("urls_new", templateVars);
+  console.log("Cookies: ", req.cookies);
+  if (req.cookies["user_id"]) {
+    res.render("urls_new", templateVars);
+  } else {
+    res.render("login");
+  }
 });
 
 // Adding new URL to main URL page
