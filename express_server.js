@@ -1,5 +1,3 @@
-// Add comments to code.
-
 var express = require("express");
 var app = express();
 const bodyParser = require("body-parser");
@@ -36,6 +34,16 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
+});
+
+// New Registration Form
+app.get("/register", (req, res) => {
+  let templateVars = {
+    userEmail: req.body["userEmail"],
+    userPassword: req.body["userPassword"],
+    username: req.cookies["username"]
+  };
+  res.render("user_registration", templateVars);
 });
 
 // All URLs
