@@ -2,6 +2,7 @@ var express = require("express");
 var app = express();
 const bodyParser = require("body-parser");
 var cookieParser = require("cookie-parser");
+var bcrypt = require("bcryptjs");
 var PORT = 8081;
 
 app.set("view engine", "ejs");
@@ -48,12 +49,15 @@ const users = {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-
+// ******************************************************************
 // Posting to login page with cookie
 app.post("/login", (req, res) => {
+  const password = req.body["password"];
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   for (var user_id in users) {
     if (users[user_id].email === req.body["user_email"]) {
-      if (users[user_id].password === req.body["password"]) {
+      if (bcrypt.compareSync(password, hashedPassword)) {
         res.cookie("user_id", users[user_id].id);
         res.redirect("/"); // <--Compass said to set to "/", but hasn't said to make that page yet.
       } else {
@@ -71,28 +75,22 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 })
 
-// // Logging in USED TO BE IN HEADER BEFORE I MADE LOGIN PAGE
-// app.post("/login", (req, res) => {
-//   res.cookie("user_id", req.body["user_id"]);
-//   res.redirect("/urls");
-// });
-
 // Logging out
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/urls");
 });
-
+// ******************************************************************
 // New user registration form
 app.get("/register", (req, res) => {
   let templateVars = {
     userEmail: req.body["email"],
-    userPassword: req.body["password"],
+    userPassword:req.body["password"],
     user: users[req.cookies["user_id"]]
   };
   res.render("user_registration", templateVars);
 });
-
+// ******************************************************************
 // Adding new user to Users Database
 app.post("/register", (req, res) => {
   let alreadyExists = false;
@@ -110,14 +108,16 @@ app.post("/register", (req, res) => {
     let newUser = {
       id: randomUserID,
       email: req.body["email"],
-      password: req.body["password"]
+      password: bcrypt.hashSync(req.body["password"], 10)
     }
-    users[randomUserID] = newUser
+    users[randomUserID] = newUser;
     res.cookie("user_id", randomUserID);
     res.redirect("/urls");
+
+    console.log(users);
   }
 });
-
+// *******************************************************************
 // All URLs
 app.get("/urls", (req, res) => {
 // Filter for just the URLs created by the current user.
