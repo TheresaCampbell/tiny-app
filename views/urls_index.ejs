@@ -12,26 +12,27 @@
         <tr>
           <th>Short URLs</th>
           <th>Long URLs</th>
+          <!--  Added userID of creator. Maybe didn't have to... -->
           <th>userID of Creator</th>
         </tr>
       </thead>
       <tbody>
-        <% urls.forEach(url => { %>
+        <% for (var url in urls) { %>
         <tr>
-          <td><%= url.shortURL %></td>
-          <td><%= url.longURL %></td>
+          <td><%= url %></td>
+          <td><%= urls[url].longURL %></td>
          <!--  Added userID of creator. Maybe didn't have to... -->
-          <td><%= url.userID %>
+          <td><%= urls[url].userID %>
           <td>
-            <a href="/urls/<%=url.shortURL%>">Edit</a>
+            <a href="/urls/<%=url%>">Edit</a>
           </td>
           <td>
-            <form method="POST" action="/urls/<%=url.shortURL%>/delete">
+            <form method="POST" action="/urls/<%=url%>/delete">
               <input type="Submit" value="Delete"/>
             </form>
           </td>
         </tr>
-        <% }) %>
+        <% } %>
         <tr>
           <td colSpan="2">
             <a href="/urls/new">New Tiny URL</a>

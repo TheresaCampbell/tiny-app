@@ -15,25 +15,25 @@ function generateRandomString() {
     string += possible.charAt(Math.floor(Math.random() * possible.length));
   return string;
 }
-
-const findURL = function (shortURL) {
-  const foundURL = urlDatabase.filter(url => url.shortURL === shortURL)[0];
-  return foundURL
-}
+// // Function to find a URL in an array-based database.
+// const findURL = function (shortURL) {
+//   const foundURL = urlDatabase.filter(url => url.shortURL === shortURL)[0];
+//   return foundURL
+// }
 
 // URL Database
-var urlDatabase = [
-  {
+var urlDatabase = {
+  "b2xVn2": {
     shortURL: "b2xVn2",
     longURL: "http://www.lighthouselabs.ca",
     userID: "userRandomID"
   },
-  {
+  "9sm5xk": {
     shortURL: "9sm5xk",
     longURL: "http://www.google.com",
     userID: "user2RandomID"
   }
-];
+};
 
 // Users Database
 const users = {
@@ -53,13 +53,7 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-// Creating login page
-app.get("/login", (req, res) => {
-  res.cookie("user_id", req.body["user_id"]);
-  res.render("login");
-})
-
-// Posting to login page
+// Posting to login page with cookie
 app.post("/login", (req, res) => {
   for (var user_id in users) {
     if (users[user_id].email === req.body["user_email"]) {
@@ -74,6 +68,12 @@ app.post("/login", (req, res) => {
   }
   res.status(403).render("403");
 });
+
+// Login page
+app.get("/login", (req, res) => {
+  let templateVars = {user: users[req.cookies["user_id"]]};
+  res.render("login", templateVars);
+})
 
 // // Logging in USED TO BE IN HEADER BEFORE I MADE LOGIN PAGE
 // app.post("/login", (req, res) => {
@@ -134,7 +134,7 @@ app.get("/urls", (req, res) => {
 // New URL form
 app.get("/urls/new", (req, res) => {
   let templateVars = { user: users[req.cookies["user_id"]] };
-  if (req.cookies["user_id"]) {
+  if (req.cookies["user_id"] && req.cookies["user_id"] !== undefined) {
     res.render("urls_new", templateVars);
   } else {
     res.render("login");
@@ -150,41 +150,54 @@ app.post("/urls", (req, res) => {
     longURL: req.body.longURL,
     userID: req.cookies["user_id"]
   }
-  urlDatabase.push(newURL);
+  urlDatabase[randomURL] = newURL;
   res.redirect(`/urls/${randomURL}`)
+  console.log(urlDatabase);
 });
-// ****************************************************************
+
 // Redirects to long URL's website
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
+  let longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
-// ****************************************************************
+
 // Single URL
 app.get("/urls/:id", (req, res) => {
-
-
-
   let templateVars = {
     shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].longURL,
     user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
 });
-// ****************************************************************
+// *****************************************************
 // Edit form (which immediately redirects back to the main URL page)
 app.post("/urls/:shortURL/edit", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body["longURL"];
+  urlDatabase[req.params.shortURL].longURL = req.body["longURL"];
   res.redirect("/urls");
 });
-
+// *****************************************************
+// app.post("/login", (req, res) => {
+//   for (var user_id in users) {
+//     if (users[user_id].email === req.body["user_email"]) {
+//       if (users[user_id].password === req.body["password"]) {
+//         res.cookie("user_id", users[user_id].id);
+//         res.redirect("/"); // <--Compass said to set to "/", but hasn't said to make that page yet.
+//       } else {
+//         res.status(403).render("403");
+//       }
+//       return
+//     }
+//   }
+//   res.status(403).render("403");
+// });
+// *****************************************************
 // Delete a URL (which immediately redirects back to the main URL page)
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
-
+// *****************************************************
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
