@@ -7,6 +7,7 @@
     <header>
     <%- include partials/_header.ejs %>
     </header>
+    <% if (user) { %>
     <table class="table">
       <thead>
         <tr>
@@ -40,5 +41,8 @@
         </tr>
       </tbody>
     </table>
+    <% } else { %>
+    <h2>Please log in or register to see the URLs</h2>
+    <% } %>
   </body>
 </html>

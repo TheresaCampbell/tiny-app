@@ -8,6 +8,7 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
+// Create a random 6 character string for short URLs and user IDs.
 function generateRandomString() {
   var string = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -15,11 +16,6 @@ function generateRandomString() {
     string += possible.charAt(Math.floor(Math.random() * possible.length));
   return string;
 }
-// // Function to find a URL in an array-based database.
-// const findURL = function (shortURL) {
-//   const foundURL = urlDatabase.filter(url => url.shortURL === shortURL)[0];
-//   return foundURL
-// }
 
 // URL Database
 var urlDatabase = {
@@ -124,13 +120,24 @@ app.post("/register", (req, res) => {
 
 // All URLs
 app.get("/urls", (req, res) => {
+// Filter for just the URLs created by the current user.
+  function urlsForUser(id) {
+  var filteredURLs = {}
+  for (shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === req.cookies.user_id) {
+      filteredURLs[shortURL] = urlDatabase[shortURL]
+    }
+  }
+  return filteredURLs;
+}
+
   let templateVars = {
-    urls: urlDatabase,
+    urls: urlsForUser(req.cookies["user_id"]),
     user: users[req.cookies["user_id"]]
   };
   res.render("urls_index", templateVars);
 });
-
+// ************************************************************
 // New URL form
 app.get("/urls/new", (req, res) => {
   let templateVars = { user: users[req.cookies["user_id"]] };
@@ -140,7 +147,7 @@ app.get("/urls/new", (req, res) => {
     res.render("login");
   }
 });
-
+// ************************************************************
 // Adding new URL to main URL page
 app.post("/urls", (req, res) => {
   var errors = [];
@@ -163,41 +170,39 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Single URL
 app.get("/urls/:id", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id].longURL,
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("urls_show", templateVars);
+  if (req.cookies["user_id"] === urlDatabase[req.params.id].userID) {
+    let templateVars = {
+      shortURL: req.params.id,
+      longURL: urlDatabase[req.params.id].longURL,
+      user: users[req.cookies["user_id"]]
+    };
+    res.render("urls_show", templateVars);
+  } else {
+    res.status(401).render("401");
+  }
 });
-// *****************************************************
+
 // Edit form (which immediately redirects back to the main URL page)
 app.post("/urls/:shortURL/edit", (req, res) => {
   urlDatabase[req.params.shortURL].longURL = req.body["longURL"];
   res.redirect("/urls");
 });
-// *****************************************************
-// app.post("/login", (req, res) => {
-//   for (var user_id in users) {
-//     if (users[user_id].email === req.body["user_email"]) {
-//       if (users[user_id].password === req.body["password"]) {
-//         res.cookie("user_id", users[user_id].id);
-//         res.redirect("/"); // <--Compass said to set to "/", but hasn't said to make that page yet.
-//       } else {
-//         res.status(403).render("403");
-//       }
-//       return
-//     }
-//   }
-//   res.status(403).render("403");
-// });
-// *****************************************************
+
 // Delete a URL (which immediately redirects back to the main URL page)
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  if (req.cookies["user_id"] === urlDatabase[req.params.shortURL].userID) {
+    let templateVars = {
+      shortURL: req.params.id,
+      longURL: urlDatabase[req.params.shortURL].longURL,
+      user: users[req.cookies["user_id"]]
+    };
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/urls");
+  } else {
+    res.status(403).render("403");
+  }
 });
-// *****************************************************
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
