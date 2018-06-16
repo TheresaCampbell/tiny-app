@@ -21,7 +21,7 @@
           <td><%= longURL %></td>
           <td>
             <form method="POST" action="/urls/<%=shortURL%>/edit">
-              <input type="text" name="longURL" value="Make edits here" />
+              <input type="text" name="longURL" value=<%=longURL%>/>
               <input type="Submit" value="Update"/>
             </form>
           </td>

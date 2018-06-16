@@ -13,8 +13,6 @@
         <tr>
           <th>Short URLs</th>
           <th>Long URLs</th>
-          <!--  Added userID of creator. Maybe didn't have to... -->
-          <th>userID of Creator</th>
         </tr>
       </thead>
       <tbody>
@@ -22,10 +20,10 @@
         <tr>
           <td><%= url %></td>
           <td><%= urls[url].longURL %></td>
-         <!--  Added userID of creator. Maybe didn't have to... -->
-          <td><%= urls[url].userID %>
           <td>
-            <a href="/urls/<%=url%>">Edit</a>
+            <form method="GET" action="/urls/<%=url%>">
+              <input type="Submit" value="Edit"/>
+            </form>
           </td>
           <td>
             <form method="POST" action="/urls/<%=url%>/delete">
@@ -36,13 +34,13 @@
         <% } %>
         <tr>
           <td colSpan="2">
-            <a href="/urls/new">New Tiny URL</a>
+            <a href="/urls/new">Create a New Short Link</a>
           </td>
         </tr>
       </tbody>
     </table>
     <% } else { %>
-    <h2>Please log in or register to see the URLs</h2>
+    <h4>Please log in or register to see the URLs</h4>
     <% } %>
   </body>
 </html>
