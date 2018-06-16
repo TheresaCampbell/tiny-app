@@ -12,3 +12,12 @@ If I'm logged in and I manually go to the registraiton page, I get an error sayi
 
 /register page still shows the register link from the not logged in version of the header.
 
+Check out all pages that use error messages.
+Should the messages be more specific?
+Should I make more error pages?
+
+Typing the deleting address takes me nowhere.
+It's because there's no app.get("urls/:id/delete")
+
+/login only checking email.
+Should also be checking passwords with bcrypt hash.

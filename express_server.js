@@ -73,7 +73,7 @@ app.post("/login", (req, res) => {
     if (users[user_id].email === req.body["user_email"]) {
       if (bcrypt.compareSync(password, hashedPassword)) {
         req.session.user_id = users[user_id].id;
-        res.redirect("/"); // <--Compass said to set to "/", but hasn't said to make that page yet.
+        res.redirect("/");
       } else {
         res.status(403).render("403");
       }
@@ -85,9 +85,14 @@ app.post("/login", (req, res) => {
 // ************************************************************
 // Login page
 app.get("/login", (req, res) => {
-  let templateVars = {user: users[req.session.user_id]};
-  res.render("login", templateVars);
-})
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  } else {
+    let templateVars = {user: users[req.session.user_id]};
+    res.render("login", templateVars);
+    console.log("@Login: ", users);
+  }
+});
 
 // Logging out
 app.post("/logout", (req, res) => {
@@ -97,12 +102,16 @@ app.post("/logout", (req, res) => {
 
 // New user registration form
 app.get("/register", (req, res) => {
-  let templateVars = {
-    userEmail: req.body["email"],
-    userPassword:req.body["password"],
-    user: users[req.session.user_id]
-  };
-  res.render("user_registration", templateVars);
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  } else {
+    let templateVars = {
+      userEmail: req.body["email"],
+      userPassword:req.body["password"],
+      user: users[req.session.user_id]
+    };
+    res.render("user_registration", templateVars);
+  }
 });
 
 // Adding new user to Users Database
@@ -113,7 +122,9 @@ app.post("/register", (req, res) => {
     if (users[user_id].email === req.body["email"]) {
       alreadyExists = true;
     }
+    console.log("@Register: ", users);
   }
+
   // If email is already in Users database, or email or password fields are left blank, Error 400. Otherwise, user is added.
   if (alreadyExists || !req.body["email"] || !req.body["password"]) {
     res.status(400).render("400");
@@ -162,7 +173,7 @@ app.get("/urls/new", (req, res) => {
 
 // Adding new URL to main URL page
 app.post("/urls", (req, res) => {
-  var errors = [];
+  // var errors = [];
   let randomURL = createRandomString();
   const newURL = {
     shortURL: randomURL,
@@ -174,40 +185,52 @@ app.post("/urls", (req, res) => {
 });
 
 // Redirects to long URL's website
-app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
+app.get("/u/:id", (req, res) => {
+  for (var urlID in urlDatabase) {
+    if (urlDatabase[urlID].shortURL === req.params.id) {
+      let longURL = urlDatabase[req.params.id].longURL;
+      res.redirect(longURL);
+    } else {
+      res.status(400).render("400");
+    }
+  }
 });
 
 // Single URL
 app.get("/urls/:id", (req, res) => {
+  for (var urlID in urlDatabase) {
+    if (urlDatabase[urlID].shortURL === req.params.id) {
+      if (req.session.user_id === urlDatabase[req.params.id].userID) {
+        let templateVars = {
+          shortURL: req.params.id,
+          longURL: urlDatabase[req.params.id].longURL,
+          user: users[req.session.user_id]
+        };
+        res.render("urls_show", templateVars);
+      } else {
+        res.status(401).render("401");
+      }
+      return;
+    }
+  }
+  res.status(400).render("400");
+});
+
+// Edit form (which immediately redirects back to the main URL page)
+app.post("/urls/:id", (req, res) => {
+  urlDatabase[req.params.id].longURL = req.body["longURL"];
+  res.redirect("/urls");
+});
+// ************************************************************
+// Delete a URL (which immediately redirects back to the main URL page)
+app.post("/urls/:id/delete", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.id].userID) {
     let templateVars = {
       shortURL: req.params.id,
       longURL: urlDatabase[req.params.id].longURL,
       user: users[req.session.user_id]
     };
-    res.render("urls_show", templateVars);
-  } else {
-    res.status(401).render("401");
-  }
-});
-
-// Edit form (which immediately redirects back to the main URL page)
-app.post("/urls/:shortURL/edit", (req, res) => {
-  urlDatabase[req.params.shortURL].longURL = req.body["longURL"];
-  res.redirect("/urls");
-});
-// ************************************************************
-// Delete a URL (which immediately redirects back to the main URL page)
-app.post("/urls/:shortURL/delete", (req, res) => {
-  if (req.session.user_id === urlDatabase[req.params.shortURL].userID) {
-    let templateVars = {
-      shortURL: req.params.id,
-      longURL: urlDatabase[req.params.shortURL].longURL,
-      user: users[req.session.user_id]
-    };
-    delete urlDatabase[req.params.shortURL];
+    delete urlDatabase[req.params.id];
     res.redirect("/urls");
   } else {
     res.status(403).render("403");
