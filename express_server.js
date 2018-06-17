@@ -42,12 +42,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "a-b-c"
+    password: bcrypt.hashSync("a-b-c", 10)
   },
  "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "1-2-3"
+    password: bcrypt.hashSync("1-2-3", 10)
   }
 };
 
@@ -66,22 +66,22 @@ app.get("/", (req, res) => {
 // ************************************************************
 // Posting to login page with cookie
 app.post("/login", (req, res) => {
-  const password = req.body["password"];
-  const hashedPassword = bcrypt.hashSync(password, 10);
 
   for (var user_id in users) {
-    if (users[user_id].email === req.body["user_email"]) {
-      if (bcrypt.compareSync(password, hashedPassword)) {
+    if (users[user_id].email === req.body["email"]) {
+      if (bcrypt.compareSync(req.body["password"], users[user_id].password)) {
         req.session.user_id = users[user_id].id;
         res.redirect("/");
-      } else {
+        return;
+      }
+      if (!bcrypt.compareSync(req.body["password"], users[user_id].password)) {
         res.status(403).render("403");
       }
-      return
+      return;
     }
   }
-  res.status(403).render("403");
-});
+  res.status(400).render("400");
+ });
 // ************************************************************
 // Login page
 app.get("/login", (req, res) => {
@@ -90,7 +90,6 @@ app.get("/login", (req, res) => {
   } else {
     let templateVars = {user: users[req.session.user_id]};
     res.render("login", templateVars);
-    console.log("@Login: ", users);
   }
 });
 
@@ -122,9 +121,7 @@ app.post("/register", (req, res) => {
     if (users[user_id].email === req.body["email"]) {
       alreadyExists = true;
     }
-    console.log("@Register: ", users);
   }
-
   // If email is already in Users database, or email or password fields are left blank, Error 400. Otherwise, user is added.
   if (alreadyExists || !req.body["email"] || !req.body["password"]) {
     res.status(400).render("400");
@@ -139,6 +136,7 @@ app.post("/register", (req, res) => {
     req.session.user_id = randomUserID;
     res.redirect("/urls");
   }
+  console.log(users);
 });
 
 // All URLs
