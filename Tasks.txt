@@ -1,0 +1,5 @@
+/register page still shows the register link from the not logged in version of the header.
+
+Typing the deleting address takes me nowhere.
+It's because there's no app.get("urls/:id/delete")
+

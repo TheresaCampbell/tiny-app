@@ -162,7 +162,7 @@ app.get("/urls", (req, res) => {
 // New URL form
 app.get("/urls/new", (req, res) => {
   let templateVars = { user: users[req.session.user_id] };
-  if (req.session.user_id && req.session.user_id !== undefined) {
+  if (req.session.user_id) {
     res.render("urls_new", templateVars);
   } else {
     res.render("login");
@@ -171,7 +171,6 @@ app.get("/urls/new", (req, res) => {
 
 // Adding new URL to main URL page
 app.post("/urls", (req, res) => {
-  // var errors = [];
   let randomURL = createRandomString();
   const newURL = {
     shortURL: randomURL,
@@ -189,7 +188,7 @@ app.get("/u/:id", (req, res) => {
       let longURL = urlDatabase[req.params.id].longURL;
       res.redirect(longURL);
     } else {
-      res.status(400).render("400");
+      res.status(404).render("404");
     }
   }
 });
@@ -211,7 +210,7 @@ app.get("/urls/:id", (req, res) => {
       return;
     }
   }
-  res.status(400).render("400");
+  res.status(404).render("404");
 });
 
 // Edit form (which immediately redirects back to the main URL page)
@@ -231,7 +230,7 @@ app.post("/urls/:id/delete", (req, res) => {
     delete urlDatabase[req.params.id];
     res.redirect("/urls");
   } else {
-    res.status(403).render("403");
+    res.status(401).render("401");
   }
 });
 // ************************************************************
