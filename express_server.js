@@ -1,3 +1,4 @@
+// Middleware
 var express = require("express");
 var app = express();
 const bodyParser = require("body-parser");
@@ -5,6 +6,7 @@ var cookieSession = require('cookie-session');
 var bcrypt = require("bcryptjs");
 var PORT = 8081;
 
+// Middleware Stetup
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
@@ -14,10 +16,11 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000
 }))
 
-// Create a random 6 character string for short URLs and user IDs.
+// Creates a random 6 character string for short URLs and user IDs.
 function createRandomString() {
   var string = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
   for (var i = 0; i < 6; i++)
     string += possible.charAt(Math.floor(Math.random() * possible.length));
   return string;
@@ -51,10 +54,12 @@ const users = {
   }
 };
 
+// JSON list of URL Database
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+// Root redirects to main URLs page if user is logged in, or to login page if they're not.
 app.get("/", (req, res) => {
   if (req.session.user_id) {
     res.redirect("/urls");
@@ -63,10 +68,8 @@ app.get("/", (req, res) => {
   }
 });
 
-// ************************************************************
 // Posting to login page with cookie
 app.post("/login", (req, res) => {
-
   for (var user_id in users) {
     if (users[user_id].email === req.body["email"]) {
       if (bcrypt.compareSync(req.body["password"], users[user_id].password)) {
@@ -82,7 +85,7 @@ app.post("/login", (req, res) => {
   }
   res.status(400).render("400");
  });
-// ************************************************************
+
 // Login page
 app.get("/login", (req, res) => {
   if (req.session.user_id) {
@@ -122,6 +125,7 @@ app.post("/register", (req, res) => {
       alreadyExists = true;
     }
   }
+
   // If email is already in Users database, or email or password fields are left blank, Error 400. Otherwise, user is added.
   if (alreadyExists || !req.body["email"] || !req.body["password"]) {
     res.status(400).render("400");
@@ -143,15 +147,17 @@ app.post("/register", (req, res) => {
 app.get("/urls", (req, res) => {
 // Filter for just the URLs created by the current user.
   function urlsForUser(id) {
-  var filteredURLs = {}
-  for (shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userID === req.session.user_id) {
-      filteredURLs[shortURL] = urlDatabase[shortURL]
-    }
-  }
-  return filteredURLs;
-}
+    var filteredURLs = {}
 
+    for (shortURL in urlDatabase) {
+      if (urlDatabase[shortURL].userID === req.session.user_id) {
+        filteredURLs[shortURL] = urlDatabase[shortURL]
+      }
+    }
+    return filteredURLs;
+  }
+
+// Render just the URLs that belong to the user.
   let templateVars = {
     urls: urlsForUser(req.session.user_id),
     user: users[req.session.user_id]
@@ -162,6 +168,7 @@ app.get("/urls", (req, res) => {
 // New URL form
 app.get("/urls/new", (req, res) => {
   let templateVars = { user: users[req.session.user_id] };
+
   if (req.session.user_id) {
     res.render("urls_new", templateVars);
   } else {
@@ -218,7 +225,7 @@ app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id].longURL = req.body["longURL"];
   res.redirect("/urls");
 });
-// ************************************************************
+
 // Delete a URL (which immediately redirects back to the main URL page)
 app.post("/urls/:id/delete", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.id].userID) {
@@ -233,7 +240,8 @@ app.post("/urls/:id/delete", (req, res) => {
     res.status(401).render("401");
   }
 });
-// ************************************************************
+
+// Server is listening for changes on Port 8081
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
