@@ -1,10 +1,10 @@
 // Middleware
-var express = require("express");
-var app = express();
+const express = require("express");
+const app = express();
 const bodyParser = require("body-parser");
-var cookieSession = require('cookie-session');
-var bcrypt = require("bcryptjs");
-var PORT = 8081;
+const cookieSession = require('cookie-session');
+const bcrypt = require("bcryptjs");
+const PORT = 8081;
 
 // Middleware Stetup
 app.set("view engine", "ejs");
@@ -18,16 +18,16 @@ app.use(cookieSession({
 
 // Creates a random 6 character string for short URLs and user IDs.
 function createRandomString() {
-  var string = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let string = "";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-  for (var i = 0; i < 6; i++)
+  for (let i = 0; i < 6; i++)
     string += possible.charAt(Math.floor(Math.random() * possible.length));
   return string;
 }
 
 // URL Database
-var urlDatabase = {
+const urlDatabase = {
   "b2xVn2": {
     shortURL: "b2xVn2",
     longURL: "http://www.lighthouselabs.ca",
@@ -38,7 +38,7 @@ var urlDatabase = {
     longURL: "http://www.google.com",
     userID: "user2RandomID"
   }
-};
+}
 
 // Users Database
 const users = {
@@ -52,7 +52,7 @@ const users = {
     email: "user2@example.com",
     password: bcrypt.hashSync("1-2-3", 10)
   }
-};
+}
 
 // JSON list of URL Database
 app.get("/urls.json", (req, res) => {
@@ -70,7 +70,7 @@ app.get("/", (req, res) => {
 
 // Posting to login page with cookie
 app.post("/login", (req, res) => {
-  for (var user_id in users) {
+  for (let user_id in users) {
     if (users[user_id].email === req.body["email"]) {
       if (bcrypt.compareSync(req.body["password"], users[user_id].password)) {
         req.session.user_id = users[user_id].id;
@@ -120,7 +120,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   let alreadyExists = false;
 
-  for (var user_id in users) {
+  for (let user_id in users) {
     if (users[user_id].email === req.body["email"]) {
       alreadyExists = true;
     }
@@ -146,7 +146,7 @@ app.post("/register", (req, res) => {
 app.get("/urls", (req, res) => {
 // Filter for just the URLs created by the current user.
   function urlsForUser(id) {
-    var filteredURLs = {}
+    let filteredURLs = {}
 
     for (shortURL in urlDatabase) {
       if (urlDatabase[shortURL].userID === req.session.user_id) {
@@ -160,7 +160,7 @@ app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlsForUser(req.session.user_id),
     user: users[req.session.user_id]
-  };
+  }
   res.render("urls_index", templateVars);
 });
 
@@ -191,7 +191,7 @@ app.post("/urls", (req, res) => {
 app.get("/u/:id", (req, res) => {
   let urlExists = false;
 
-  for (var urlID in urlDatabase) {
+  for (let urlID in urlDatabase) {
     if (urlID === req.params.id) {
       urlExists = true
     }
@@ -207,14 +207,14 @@ app.get("/u/:id", (req, res) => {
 
 // Single URL
 app.get("/urls/:id", (req, res) => {
-  for (var urlID in urlDatabase) {
+  for (let urlID in urlDatabase) {
     if (urlDatabase[urlID].shortURL === req.params.id) {
       if (req.session.user_id === urlDatabase[req.params.id].userID) {
         let templateVars = {
           shortURL: req.params.id,
           longURL: urlDatabase[req.params.id].longURL,
           user: users[req.session.user_id]
-        };
+        }
         res.render("urls_show", templateVars);
       } else {
         res.status(401).render("401");
