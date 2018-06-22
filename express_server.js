@@ -140,7 +140,6 @@ app.post("/register", (req, res) => {
     req.session.user_id = randomUserID;
     res.redirect("/urls");
   }
-  console.log(users);
 });
 
 // All URLs
@@ -190,13 +189,19 @@ app.post("/urls", (req, res) => {
 
 // Redirects to long URL's website
 app.get("/u/:id", (req, res) => {
+  let urlExists = false;
+
   for (var urlID in urlDatabase) {
-    if (urlDatabase[urlID].shortURL === req.params.id) {
-      let longURL = urlDatabase[req.params.id].longURL;
-      res.redirect(longURL);
-    } else {
-      res.status(404).render("404");
+    if (urlID === req.params.id) {
+      urlExists = true
     }
+  }
+
+  if (urlExists) {
+    let longURL = urlDatabase[req.params.id].longURL;
+    res.redirect(longURL);
+  } else {
+    res.status(404).render("404");
   }
 });
 
