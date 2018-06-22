@@ -5,7 +5,7 @@ TinyApp is a full stack web application built with Node and Express. It allows u
 ## Final Product
 
 !["Screenshot of URLs page"](https://github.com/TheresaCampbell/tiny-app/blob/master/docs/urls-page.png?raw=true)
-!["Screenshot of login and logout routes, showing how passwords are verified and cookies are used"](https://github.com/TheresaCampbell/tiny-app/blob/master/docs/login-logout-routes.png?raw=true)
+!["Screenshot of login and logout routes, showing how passwords are verified and cookies are used"](https://github.com/TheresaCampbell/tiny-app/blob/master/docs/login-and-logout-routes.png?raw=true)
 
 ## Dependencies
 
